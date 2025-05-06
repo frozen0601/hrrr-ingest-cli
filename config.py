@@ -1,4 +1,14 @@
 import datetime
+import logging
+
+
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,  # Set the level of logging (INFO, WARNING, etc.)
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],  # Output to the console by default
+    )
+
 
 DB_FILE = "data.db"
 TABLE_NAME = "hrrr_forecasts"
@@ -27,8 +37,8 @@ VARIABLE_MAP = {
     "relative_humidity_2m": {"shortName": "2r"},  # https://codes.ecmwf.int/grib/param-db/260242
     "u_component_wind_10m": {"shortName": "10u"},  # https://codes.ecmwf.int/grib/param-db/165
     "v_component_wind_10m": {"shortName": "10v"},  # https://codes.ecmwf.int/grib/param-db/166
-    "u_component_wind_80m": {"shortName": "u"},
-    "v_component_wind_80m": {"shortName": "v"},
+    "u_component_wind_80m": {"shortName": "u", "typeOfLevel": "heightAboveGround", "level": 80},
+    "v_component_wind_80m": {"shortName": "v", "typeOfLevel": "heightAboveGround", "level": 80},
 }
 
 ALL_VARIABLES = list(VARIABLE_MAP.keys())

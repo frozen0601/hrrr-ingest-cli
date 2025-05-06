@@ -2,3 +2,4 @@ __pycache__/
 .vscode/
 *.grib2
 *.idx
+cfgrib_index_cache

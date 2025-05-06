@@ -6,7 +6,6 @@ forecast_hour = 48
 s3_url = get_s3_path(run_date_dt, forecast_hour)
 
 
-
 idx_url = "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250101/conus/hrrr.t06z.wrfsfcf00.grib2.idx"
 # For your actual code, ensure your S3_BUCKET_URL and path construction are correct.
 # This example uses the direct HTTPS path for 'requests'.
