@@ -10,5 +10,4 @@ dependencies:
   - eccodes # cfgrib wrapper for reading and writing GRIB files
   - boto3
   - requests
-  - tqdm
 
