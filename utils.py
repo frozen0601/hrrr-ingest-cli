@@ -1,6 +1,7 @@
 import logging
 from datetime import date
 import xarray as xr
+import numpy as np
 from config import S3_BUCKET_URL, RUN_HOUR, VARIABLE_MAP, setup_logging
 
 setup_logging()
@@ -25,6 +26,15 @@ def get_grib2_uri(run_date_dt, forecast_hour, for_idx=False):
     suffix = ".idx" if for_idx else ""
     url = f"{S3_BUCKET_URL}.s3.amazonaws.com/hrrr.{run_date_dt:%Y%m%d}/{sector}/{file_path}{suffix}"
     return url
+
+
+def find_nearest_point(ds, lat, lon):
+    lon = lon if lon >= 0 else lon + 360  # wrap around the globe
+    lats = ds.latitude.values
+    lons = ds.longitude.values
+    distance_sq = (lats - lat) ** 2 + (lons - lon) ** 2
+    iy, ix = np.unravel_index(np.argmin(distance_sq), distance_sq.shape)
+    return iy, ix
 
 
 def extract_data_from_grib(
@@ -62,19 +72,20 @@ def extract_data_from_grib(
             logging.info(f"Successfully opened: {grib_file} for {variable}")
 
             # Show information about the dataset (this will print all variables and metadata)
-            print(ds)
+            # print(ds)
+            run_time = ds.time.values.item()
+            valid_time = ds.valid_time.values.item()
+            print(f"Run time: {run_time}, Valid time: {valid_time}")
 
-            # Extract data for the specified target points (if any)
             for point in target_points:
-                lat = point["latitude"]
-                lon = point["longitude"]
+                lat = point[0]
+                lon = point[1]
 
                 try:
-                    # Extract data for the current variable at the given lat/lon point
-                    data_point = ds[filter_keys].sel(latitude=lat, longitude=lon, method="nearest").values
-                    extracted_data.append(
-                        {"latitude": lat, "longitude": lon, "variable": variable, "value": data_point}
-                    )
+                    iy, ix = find_nearest_point(ds, lat, lon)
+                    data_var_name = list(ds.data_vars)[0]
+                    value = ds[data_var_name].values[iy, ix]
+                    print(f"{variable} at ({lat}, {lon}) -> closest point: ({iy, ix}) -> {value}")
                 except Exception as e:
                     logging.error(f"Error extracting {variable} at lat={lat}, lon={lon}: {e}")
 
@@ -86,8 +97,20 @@ def extract_data_from_grib(
 
 
 file_name = "hrrr.t06z.wrfsfcf00.grib2"
-extract_data_from_grib(file_name, [], list(VARIABLE_MAP.keys()))
-# extract_data_from_grib(file_name, [], ["surface_pressure"])
+points = [
+    (31.006900, -88.010300),
+    (31.756900, -106.375000),
+    (32.583889, -86.283060),
+    (32.601700, -87.781100),
+    (32.618900, -86.254800),
+    (33.255300, -87.449500),
+    (33.425878, -86.337550),
+    (33.458665, -87.356820),
+    (43.784500, -86.052400),
+]
+
+extract_data_from_grib(file_name, points, list(VARIABLE_MAP.keys()))
+# extract_data_from_grib(file_name, points, ["surface_pressure"])
 # 20250101
 # import datetime
 
