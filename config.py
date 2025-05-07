@@ -4,9 +4,9 @@ import os
 
 def setup_logging():
     logging.basicConfig(
-        level=logging.INFO,  # Set the level of logging (INFO, WARNING, etc.)
+        level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[logging.StreamHandler()],  # Output to the console by default
+        handlers=[logging.StreamHandler()],
     )
 
 

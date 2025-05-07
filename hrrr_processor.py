@@ -70,7 +70,6 @@ def extract_data_from_grib(
         filter_keys = VARIABLE_MAP[var_name]
 
         try:
-            # Open the GRIB2 dataset using xarray and cfgrib engine
             var_ds = xr.open_dataset(
                 grib_file,
                 engine="cfgrib",
@@ -110,27 +109,3 @@ def extract_data_from_grib(
             continue
 
     return pd.DataFrame(extracted_data)
-
-
-file_name = "hrrr.t06z.wrfsfcf48.grib2"
-source_s3 = "s3://noaa-hrrr-bdp-pds.s3.amazonaws.com/hrrr.20250101/conus/hrrr.t06z.wrfsfcf48.grib2"
-points = [
-    {"latitude": 31.006900, "longitude": -88.010300},
-    {"latitude": 31.756900, "longitude": -106.375000},
-    {"latitude": 32.583889, "longitude": -86.283060},
-    {"latitude": 32.601700, "longitude": -87.781100},
-    {"latitude": 32.618900, "longitude": -86.254800},
-    {"latitude": 33.255300, "longitude": -87.449500},
-    {"latitude": 33.425878, "longitude": -86.337550},
-    {"latitude": 33.458665, "longitude": -87.356820},
-    {"latitude": 43.784500, "longitude": -86.052400},
-]
-
-# find_latest_complete_run_date(48)
-# extract_data_from_grib(file_name, points, list(VARIABLE_MAP.keys()))
-# print(extract_data_from_grib(file_name, source_s3, points, ["surface_pressure"]))
-# 20250101
-# import datetime
-
-# test_date = datetime.date(2025, 1, 1)
-# print(get_grib2_uri(test_date, 0))

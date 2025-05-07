@@ -110,12 +110,10 @@ def main():
 
     # --- Batch Insert ---
     if all_inserted_data:
-        final_df = pd.concat(all_inserted_data, ignore_index=True)
-        logging.info(f"Attempting to insert {len(final_df)} new records into the database...")
+        all_inserted_data = pd.concat(all_inserted_data, ignore_index=True)
+        logging.info(f"Attempting to insert {len(all_inserted_data)} new records into the database...")
         try:
-            insert_data(con, final_df)
-            # Query to confirm how many were actually inserted (due to UNIQUE constraint)
-            # This requires tracking counts or querying before/after, insert_data currently doesn't return count
+            insert_data(con, all_inserted_data)
             logging.info("Batch insertion completed.")
         except Exception as e:
             logging.error(f"Error during batch database insertion: {e}")
