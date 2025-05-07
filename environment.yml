@@ -3,10 +3,12 @@ channels:
   - conda-forge
 dependencies:
   - python
+  - numpy
   - duckdb
   - xarray  # work with labelled multi-dimensional arrays
   - cfgrib  # A Python interface to map GRIB files to the NetCDF Common Data Model following the CF Convention using ecCodes
   - eccodes # cfgrib wrapper for reading and writing GRIB files
   - boto3
   - requests
+  - tqdm
 

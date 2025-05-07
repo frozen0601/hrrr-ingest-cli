@@ -1,5 +1,5 @@
-import datetime
 import logging
+import os
 
 
 def setup_logging():
@@ -12,21 +12,15 @@ def setup_logging():
 
 DB_FILE = "data.db"
 TABLE_NAME = "hrrr_forecasts"
-S3_BUCKET_URL = "s3://noaa-hrrr-bdp-pds"
-RUN_HOUR = 6  # 06z forecast run
+S3_BUCKET_URL = "noaa-hrrr-bdp-pds"
+CACHE_DIR = os.path.join(os.getcwd(), ".cache", "hrrr")
+CACHE_SIZE_LIMIT = 3 * 1024 * 1024 * 1024
 
-# Mapping from user-friendly names to cfgrib filter keys
-search_terms = {
-    "surface_pressure": {"shortName": "sp"},  # https://codes.ecmwf.int/grib/param-db/134
-    "surface_roughness": {"shortName": "fsr"},  # https://codes.ecmwf.int/grib/param-db/173
-    "visible_beam_downward_solar_flux": {"shortName": "vbsdf"},  # https://codes.ecmwf.int/grib/param-db/260346
-    "temperature": {"shortName": "tmp"},
-    # Add more variables here with appropriate filters
-}
+RUN_HOUR = 6  # 06z forecast run
+DEFAULT_NUM_HOURS = 48
 
 # Mapping from user-friendly names to cfgrib filter keys
 # Crosscheck between HRRR grib2 File Inventory, grib_ls, and GRIB Parameter database
-
 VARIABLE_MAP = {
     "surface_pressure": {"shortName": "sp"},  # https://codes.ecmwf.int/grib/param-db/134
     "surface_roughness": {"shortName": "fsr"},  # https://codes.ecmwf.int/grib/param-db/244
@@ -42,5 +36,3 @@ VARIABLE_MAP = {
 }
 
 ALL_VARIABLES = list(VARIABLE_MAP.keys())
-
-DEFAULT_NUM_HOURS = 48
