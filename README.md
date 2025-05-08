@@ -1,5 +1,20 @@
 # HRRR Ingest CLI (`hrrr-ingest`)
 
+## Table of Contents
+
+* [Overview](#overview)
+* [Features](#features)
+* [Setup](#setup)
+
+  * [1. Clone the repository](#1-clone-the-repository)
+  * [2. Create and activate the Conda environment (**Recommended**)](#2-create-and-activate-the-conda-environment-recommended)
+  * [3. Prepare your points file](#3-prepare-your-points-file)
+* [Usage](#usage)
+* [Configuration](#configuration)
+* [Project Structure](#project-structure)
+* [Notes & Known Issues](#notes--known-issues)
+* [References](#references)
+
 ## Overview
 
 A command-line tool to ingest and transform data from the HRRR (High-Resolution Rapid Refresh) forecasting model published by NOAA. The tool fetches meteorological forecast data, extracts values at specified geographic points, and stores them in a local DuckDB database.
@@ -88,32 +103,31 @@ The file `config.py` contains key parameters:
 
 ---
 
-## Environment
+## Project Structure
 
-Here is the Conda environment file (`environment.yml`) used in this project:
-
-```yaml
-name: my-env
-channels:
-  - conda-forge
-dependencies:
-  - python
-  - numpy
-  - duckdb
-  - xarray  # work with labelled multi-dimensional arrays
-  - cfgrib  # A Python interface to map GRIB files to the NetCDF Common Data Model following the CF Convention using ecCodes
-  - eccodes # cfgrib wrapper for reading and writing GRIB files
-  - boto3
-  - requests
 ```
-
+hrrr-ingest-cli/
+├── .cache/                 # Local cache for GRIB files (auto-created)
+├── data.db                 # DuckDB database file (auto-created)
+├── hrrr_ingest.py          # Main CLI script
+├── config.py               # Configuration variables, VARIABLE_MAP
+├── db_manager.py           # DuckDB connection and operations
+├── file_fetch.py           # S3 file downloading and caching
+├── hrrr_processor.py       # Core GRIB data extraction logic
+├── utils.py                # Utility functions (paths, points reading, etc.)
+├── environment.yml         # Python dependencies
+├── points.txt              # Example input points file
+└── README.md               # This file
+```
 ---
 
-## Notes
+## Notes & Known Issues
 
-* Tested using Python 3.10+ on Linux (WSL) with Conda.
-* Make sure paths passed to the CLI use **Linux-style paths** if you're running in WSL (e.g., `/mnt/c/...`).
-* Local cache is stored in `./.cache/hrrr/`.
+* **`num-hours` Interpretation:** The `--num-hours N` argument is interpreted as the *maximum forecast hour index* to include. For example, `--num-hours 3` will ingest data for forecast hours `f00, f01, f02, f03`.
+* **GRIB File Parsing (`extract_data_from_grib`):**
+    * It was observed during development that attempting to open the full HRRR GRIB2 files with `xarray.open_dataset` without specific `filter_by_keys` sometimes resulted in errors. To ensure reliable data extraction for each required variable, the current implementation opens the GRIB file separately for each variable using its specific filter keys. While this approach is less performant than a single file open, it proved more robust for these particular files and `cfgrib` behavior.
+* **Nearest Point Selection (`find_nearest_point`):**
+    * The built-in `xarray.Dataset.sel(..., method="nearest")` method encountered errors during development. As a workaround, a manual method for finding the nearest grid point based on Euclidean distance in latitude/longitude space is used. This is an approximation, especially for projected grids, but was necessary to proceed. Longitude handling assumes input points are `[-180, 180]` and converts them if the GRIB file's internal longitude representation differs (e.g. `[0,360]`).
 
 ---
 
